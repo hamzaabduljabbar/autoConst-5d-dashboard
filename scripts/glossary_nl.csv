@@ -1,0 +1,55 @@
+nl,en,phase
+Maatvoering gemeente,Setting out with the municipality,Groundworks
+Grondwerk,Earthworks,Groundworks
+Uitzetten grondwerk,Mark out earthworks,Groundworks
+Stellen bruggetjes,Place temporary bridges,Groundworks
+Nuts invoeren,Bring in utilities,Groundworks
+Werkvloer liftput,Lift pit blinding,Foundations
+Wapening liftvloer,Lift floor rebar,Foundations
+Bekisten liftvloer,Lift floor formwork,Foundations
+Stort liftvloer,Pour lift floor,Foundations
+Bekisten liftwanden,Lift wall formwork,Foundations
+Wapening liftwanden,Lift wall rebar,Foundations
+Stort liftwanden,Pour lift walls,Foundations
+Maatvoering fundering,Set out foundations,Foundations
+Aanvullen liftput,Backfill lift pit,Foundations
+Stellen funderingkist incl. poeren,Foundation formwork incl. pads,Foundations
+Opstorten fundering,Foundation upstands,Foundations
+Bodemafsluiting aanbrengen,Ground sealing layer,Foundations
+Installaties onder peil,Services below ground,Foundations
+Stelwerk metselwerk onder peil,Set out masonry below ground,Foundations
+Metselwerk onderpeil (buitenblad),Outer brickwork below ground,Foundations
+Maatvoering begane grondvloer,Set out ground floor,Structure
+Kanaalplaatvloer leggen (lev. week 16),Lay hollow core floor (delivered week 16),Structure
+Bekisten,Formwork,Structure
+Afstorten kanaalplaat,Pour hollow core topping,Structure
+Maatvoering,Setting out,Structure
+Plaatsen stalen kolommen,Install steel columns,Structure
+Stelwerk kalkzandsteen,Set out sand-lime walls,Structure
+Lijmwerk kalkzandsteen elementen,Glue sand-lime wall elements,Structure
+Opstellen,Set up,Structure
+Leggen breedplaat incl. Veiligheid,Lay lattice floor incl. edge safety,Structure
+Randkist,Edge formwork,Structure
+Installateurs,Services installers,Structure
+Stalen balken,Steel beams,Structure
+Wapening,Rebar,Structure
+Stort,Concrete pour,Structure
+Prefab trappen en bordes,Precast stairs and landings,Structure
+Prefab trappen en bordes 2e verd.,Precast stairs and landings level 2,Structure
+Stelwerk /lijmwerk lift,Lift shaft wall set out and gluing,Structure
+Stelwerk buitengevel,Set out outer facade,Facade
+Plaatsen kozijnen,Install window frames,Facade
+Metselwerk,Brickwork,Facade
+Steiger,Scaffold,Facade
+Prefab betonband,Precast concrete band,Facade
+Maatvoering kap,Set out roof,Roof
+Staalconstuctie dak,Roof steelwork,Roof
+Plaatsen scharnierkap incl. goot en platte daken,Install hinged roof incl. gutters and flat roofs,Roof
+Zinken bekleding dakkapelen,Zinc dormer cladding,Roof
+Dakramen,Roof windows,Roof
+Dakbedekking platte daken,Flat roof covering,Roof
+Dakpannen,Roof tiles,Roof
+Zink goot,Zinc gutter,Roof
+Afbouw,Fit-out,Fit-out
+GEVEL,Facade (summary),
+DAK,Roof (summary),

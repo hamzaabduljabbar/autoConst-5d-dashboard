@@ -1,0 +1,6 @@
+item,package,basis,amount,start_task,finish_task,note
+Earthworks,PK-09 Enabling,lump,48000,ST00040,ST00040,Task has no element in the model
+Setting out,PK-09 Enabling,lump,9500,ST00020,ST01110,Survey tasks have no elements in the model
+Utilities connections,PK-09 Enabling,lump,16000,ST00300,ST00300,Below-ground services are not modelled
+Scaffolding,PK-10 Temporary works,lump,62000,ST01020,ST01040,Temporary works are not in the model
+Site facilities and management,PRELIMS,weekly,3500,,,Runs for the whole job: cost grows if the job runs longer

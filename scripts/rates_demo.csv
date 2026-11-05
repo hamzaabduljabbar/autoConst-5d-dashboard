@@ -1,0 +1,42 @@
+group,package,item,type,name,unit,rate,labour,material,subcontract,lead_weeks
+Foundations,PK-01 Concrete works,Foundation strips and pads,Beam,^fund_,m3,240,30,50,20,2
+Lift shaft,PK-01 Concrete works,Lift shaft concrete,.*,^(liftwand|liftput|lifttop),m3,310,35,45,20,2
+Floors,PK-02 Precast floors,Hollow core floor,Slab,^vloer_V0,m2,62,10,85,5,6
+Floors,PK-02 Precast floors,Lattice girder floor,Slab,^vloerveld,m2,78,15,70,15,6
+Floors,PK-01 Concrete works,Structural topping,Slab,^vloerstort,m3,190,35,55,10,2
+Floors,PK-03 Finishes,Floor screed,Slab,^dekvloer,m2,19,0,0,100,3
+Internal walls,PK-04 Masonry,Inner leaf blockwork,Wall.*,^binnenblad,m2,48,40,55,5,3
+Internal walls,PK-04 Masonry,Internal walls,Wall.*,^binnenwand,m2,44,40,55,5,3
+Internal walls,PK-04 Masonry,Party walls,Wall.*,^separatiewand,m2,52,40,55,5,3
+Internal walls,PK-04 Masonry,Upstand walls,Wall.*,^opgaand werk,m2,44,40,55,5,3
+Facade,PK-04 Masonry,Outer leaf brickwork,Wall.*,^buitenblad,m2,105,0,35,65,6
+Facade,PK-04 Masonry,Facade insulation,Covering,^gevelisolatie,m2,18,30,70,0,3
+Facade,PK-04 Masonry,Cavity insulation,Wall,^spouwisolatie,m2,18,30,70,0,3
+Facade,PK-05 Timber frame,Timber frame panels,Wall,^HSB,m2,135,0,0,100,8
+Facade,PK-01 Concrete works,Balcony upstands,Wall,^balkonopstand,m2,90,40,50,10,2
+Facade,PK-02 Precast floors,Precast balconies,Slab,^prefab balkon,ea,2400,10,80,10,8
+Roof,PK-06 Roof,Roof trusses and rafters,Slab,^sporenkap,m2,92,0,0,100,8
+Roof,PK-06 Roof,Roof deck,Slab,^dakvloer,m2,58,0,0,100,8
+Roof,PK-06 Roof,Knee walls,Wall,^knieschot,m2,62,0,0,100,8
+Roof,PK-06 Roof,Flat roofs,.*,^plat dak,m2,74,0,0,100,4
+Roof,PK-06 Roof,Roof insulation,.*,^(dakisolatie|afschotisolatie),m2,28,0,0,100,4
+Roof,PK-06 Roof,Roof tiles,Covering,^dakpan,m2,46,0,0,100,6
+Roof,PK-06 Roof,Dormer roofs and cheeks,.*,^(dak dakkapel|zijwang),m2,145,0,0,100,6
+Roof,PK-06 Roof,Gutters and upstands,.*,^(gootconstructie|dakopstand),m2,88,0,0,100,4
+Structural steel,PK-07 Steel,Structural steel,(Beam|Column|Member),.,t,2700,0,0,100,6
+Stairs,PK-02 Precast floors,Precast stairs and landings,Stair,.,m3,1450,10,75,15,8
+Windows and doors,PK-08 Joinery,Lift doors,Door,^liftdeur,ea,850,0,0,100,10
+Windows and doors,PK-08 Joinery,Subframes,(Door|Window),^stelkozijn,ea,160,25,75,0,6
+Windows and doors,PK-08 Joinery,Roof windows and domes,Window,^(velux|dakkoepel),ea,920,20,80,0,6
+Windows and doors,PK-08 Joinery,Windows,Window,.,ea,780,20,80,0,8
+Windows and doors,PK-08 Joinery,Doors,Door,.,ea,540,20,80,0,8
+Finishes,PK-03 Finishes,Wall tiling,Covering,^wandtegelwerk,m2,62,0,0,100,3
+Finishes,PK-03 Finishes,Floor tiling,Covering,^vloertegelwerk,m2,68,0,0,100,3
+Finishes,PK-03 Finishes,Plasterboard ceilings,.*,^(gipsplafond|plafond),m2,42,0,0,100,3
+Finishes,PK-03 Finishes,Balcony paving,Covering,^betontegels,ea,14,50,50,0,2
+Finishes,PK-03 Finishes,Copings,Covering,^afdekker,ea,65,40,60,0,4
+Finishes,PK-08 Joinery,Railings,Railing,.,ea,420,0,0,100,6
+Roof,PK-06 Roof,Zinc work,.*,^zinkwerk,m2,95,0,0,100,4
+Finishes,PK-08 Joinery,Window sills,Covering,^vensterbank,ea,85,40,60,0,4
+Facade,PK-04 Masonry,Sills and flashings,Covering,^waterslag,ea,60,40,60,0,4
+Roof,PK-06 Roof,Rainwater outlets,BuildingElementProxy,^hwa afvoer,ea,180,0,0,100,3

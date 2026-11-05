@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+outputs/
+inputs/
+*.ifc
+*.xer
+*.html
+!scripts/viewer_template.html

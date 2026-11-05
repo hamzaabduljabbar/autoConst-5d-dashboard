@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5D Build Viewer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Same element list everywhere: each tab is one grouping of it. */
+:root { --paper:#eef0ec; --panel:#f8f9f6; --ink:#1d2422; --ink-2:#56605c; --line:#d3d8d2; --accent:#b5371f; --stage:#dfe3dd; --sel:rgba(181,55,31,.12); --ok:#3f7a22; --warn:#b5701a; --bar:#7c8b85;
+  --f-ui:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif; --f-tag:"IBM Plex Mono",ui-monospace,Consolas,monospace; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper:#151a19; --panel:#1b2120; --ink:#e5e9e4; --ink-2:#9aa59f; --line:#2d3532; --accent:#ef7a5d; --stage:#0f1312; --sel:rgba(239,122,93,.16); --ok:#8fd35d; --warn:#ffb84a; --bar:#5d6b66; color-scheme:dark } }
+:root[data-theme="dark"] { --paper:#151a19; --panel:#1b2120; --ink:#e5e9e4; --ink-2:#9aa59f; --line:#2d3532; --accent:#ef7a5d; --stage:#0f1312; --sel:rgba(239,122,93,.16); --ok:#8fd35d; --warn:#ffb84a; --bar:#5d6b66; color-scheme:dark }
+html,body { height:100%; margin:0 }
+body { background:var(--paper); color:var(--ink); font:14px var(--f-ui); overflow:hidden }
+.app { height:100%; display:grid; grid-template-columns:minmax(0,1fr) minmax(380px,560px); grid-template-rows:auto minmax(0,1fr) }
+header { grid-column:1/-1; display:flex; gap:20px; align-items:center; flex-wrap:wrap; padding:10px 16px; background:var(--panel); border-bottom:1px solid var(--line) }
+.brand b { font-size:16px; display:block } .brand span { color:var(--ink-2) }
+.demo { font:600 11px var(--f-tag); color:var(--warn); border:1px solid currentColor; border-radius:4px; padding:2px 6px; white-space:nowrap }
+.top { display:flex; gap:22px; margin-left:auto; flex-wrap:wrap }
+.top div { text-align:right } .top b { display:block; font-size:19px; font-variant-numeric:tabular-nums } .top small { color:var(--ink-2); font-size:11px }
+main { position:relative; background:var(--stage); min-width:0; min-height:0; overflow:hidden } canvas { display:block }
+.bar { position:absolute; left:12px; right:12px; top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:8px 10px }
+.bar input[type=range] { flex:1; min-width:140px; accent-color:var(--accent) }
+#date { font:600 13px var(--f-tag) } #todate { font-variant-numeric:tabular-nums; color:var(--ink-2) } #todate b { color:var(--ink) }
+.legend { position:absolute; left:12px; bottom:8px; background:var(--panel); border-radius:6px; padding:3px 8px; display:flex; gap:12px; color:var(--ink-2); font-size:12px; flex-wrap:wrap }
+.legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px }
+.card { position:absolute; left:12px; bottom:32px; width:min(340px,calc(100% - 24px)); max-height:60%; overflow:auto; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px }
+.card h3 { margin:0 28px 4px 0; font-size:16px } .card .x { position:absolute; right:6px; top:6px; border:0; padding:2px 8px }
+.kv { display:grid; grid-template-columns:auto 1fr; gap:3px 12px; margin-top:8px } .kv span { color:var(--ink-2) } .kv b { font-weight:500; text-align:right; font-variant-numeric:tabular-nums; overflow-wrap:anywhere }
+button { font:inherit; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:6px; padding:5px 12px; cursor:pointer }
+aside { display:grid; grid-template-rows:auto minmax(0,1fr); background:var(--panel); border-left:1px solid var(--line); min-height:0; min-width:0 }
+.tabs { display:flex; border-bottom:1px solid var(--line); overflow-x:auto }
+.tabs button { border:0; border-bottom:2px solid transparent; border-radius:0; padding:10px 12px; white-space:nowrap; color:var(--ink-2) }
+.tabs button[aria-pressed=true] { color:var(--ink); border-bottom-color:var(--accent); font-weight:600 }
+#pane { overflow:auto; padding:12px 14px }
+.note { color:var(--ink-2); font-size:12px; margin:0 0 10px }
+table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums }
+th { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); font-weight:500; text-align:right; padding:4px 6px; border-bottom:1px solid var(--line) }
+td { text-align:right; padding:6px; border-bottom:1px solid var(--line) } th:first-child,td:first-child { text-align:left; padding-left:0 } td:last-child,th:last-child { padding-right:0 }
+tr.g { cursor:pointer; font-weight:600 } tr.i { cursor:pointer; color:var(--ink-2) } tr.i td:first-child { padding-left:14px } tr.on { background:var(--sel) } tr.tot td { font-weight:700; border-bottom:0 } tr.h td { font-weight:600; background:var(--paper) }
+.gantt { position:relative; height:9px; min-width:90px; background:var(--paper); border-radius:2px } .gantt i { position:absolute; top:0; bottom:0; background:var(--bar); border-radius:2px; min-width:2px } .gantt i.now { background:#e66b24 }
+.chk { border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-bottom:8px } .chk h4 { margin:0; font-size:14px; display:flex; gap:8px; justify-content:space-between } .chk p { margin:4px 0 0; color:var(--ink-2) }
+.chk .ok { color:var(--ok) } .chk .warn { color:var(--warn) } .chk ul { margin:6px 0 0; padding-left:16px; color:var(--ink-2) } .chk button { margin-top:6px; padding:3px 9px }
+svg text { fill:var(--ink-2); font:11px var(--f-ui) }
+@media (max-width:860px) { body { overflow:auto } .app { height:auto; grid-template-columns:minmax(0,1fr); grid-template-rows:auto 60vh auto } aside { border-left:0 } #pane { overflow:visible } .top { margin-left:0 } .top div { text-align:left } }
+.kv.lines { grid-template-columns:minmax(0,1fr) max-content } .kv.lines b { white-space:nowrap }
+</style>
+<div class="app">
+  <header>
+    <div class="brand"><b>5D Build Viewer</b><span id="proj"></span></div>
+    <span class="demo">DEMO RATES</span>
+    <div class="top" id="top"></div>
+  </header>
+  <main id="main">
+    <div class="bar"><button id="play">Play</button><input id="s" type="range" min="0" value="0" aria-label="Date"><span id="date"></span><span id="todate"></span>
+      <label><input type="checkbox" id="ghost" checked> Future</label></div>
+    <div class="legend"><span><i style="background:#9eaea6"></i><span id="nDone"></span> done</span><span><i style="background:#e66b24"></i><span id="nAct"></span> in progress</span><span><i style="background:#1f5fbf"></i>selected</span><span id="credit"></span></div>
+    <div class="card" id="card" hidden></div>
+  </main>
+  <aside>
+    <nav class="tabs" id="tabs"></nav>
+    <div id="pane"></div>
+  </aside>
+</div>
+<script>/*THREE*/</script>
+<script>/*DATA*/</script>
+<script type="module">
+const $ = id => document.getElementById(id), M = window.M;
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const money = v => (M.currency || (M.mode === "boq" ? "" : "€")) + Math.round(v).toLocaleString("en-US");
+const num = (v, d = 1) => v.toLocaleString("en-US", { maximumFractionDigits: d });
+const packed = Uint8Array.from(atob(window.BIN), c => c.charCodeAt(0));
+const raw = await new Response(new Blob([packed]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
+const P = new Float32Array(raw, 0, M.nv * 3), I = new Uint32Array(raw, M.nv * 12, M.nt * 3);
+const day = s => Math.round(Date.parse(s) / 864e5), iso = d => new Date(d * 864e5).toISOString().slice(0, 10);
+const D0 = day(M.start), D1 = day(M.finish), DAYS = D1 - D0 + 1;
+const T = M.tasks, E = M.elements.filter(e => e.type !== "Site"), BOQ = M.mode === "boq";
+const unallocated = (M.unalloc || []).reduce((s, u) => s + u.amount, 0);
+const zeroM = (M.boq || []).filter(l => l.amount && Math.abs(l.amount - l.model - l.outside) > .05);
+E.forEach(e => { e.da = e.a ? day(e.a) : null; e.db = e.b ? day(e.b) : null; e.c = e.cost || 0; });
+const priced = E.filter(e => e.cost !== undefined), unpriced = E.filter(e => e.cost === undefined);
+
+// every money figure below is the same element list, regrouped
+function sumBy(list, f) { const o = new Map(); list.forEach(e => { const k = f(e); if (!o.has(k)) o.set(k, []); o.get(k).push(e); }); return o; }
+const total = list => list.reduce((s, e) => s + e.c, 0);
+const scopeTotal = M.scope.reduce((s, x) => s + x.cost, 0), modelTotal = total(priced), grand = modelTotal + scopeTotal;
+const spend = new Float64Array(DAYS);
+const spread = (cost, a, b) => { a = Math.max(a, D0); b = Math.min(b, D1); const n = b - a + 1; for (let d = a; d <= b; d++) spend[d - D0] += cost / n; };
+const when = (cost, t) => T[t] && T[t].start ? spread(cost, day(T[t].start), day(T[t].finish)) : spread(cost, D0, D1);  // undated money stays in the total
+if (BOQ) { priced.forEach(e => e.lines.forEach(l => when(l.cost, l.task))); M.scope.forEach(x => when(x.cost, x.task)); }
+else {
+  priced.forEach(e => { if (e.da !== null) spread(e.c, e.da, e.db); else spread(e.c, D0, D1); });
+  M.scope.forEach(x => { if (x.a) spread(x.cost, day(x.a), day(x.b)); else spread(x.cost, D0, D1); });
+}
+const cum = new Float64Array(DAYS); spend.reduce((s, v, i) => cum[i] = s + v, 0);
+const taskCost = {};
+if (BOQ) { priced.forEach(e => e.lines.forEach(l => { taskCost[l.task] = (taskCost[l.task] || 0) + l.cost; })); M.scope.forEach(x => { taskCost[x.task] = (taskCost[x.task] || 0) + x.cost; }); }
+else priced.forEach(e => e.tasks.forEach(t => { taskCost[t] = (taskCost[t] || 0) + e.c / e.tasks.length; }));
+const taskEls = {}; E.forEach(e => e.tasks.forEach(t => { taskEls[t] = (taskEls[t] || 0) + 1; }));
+const named = Object.entries(T).filter(([, t]) => t.nl && (t.phase || BOQ) && t.start && t.finish);
+const packages = sumBy(priced, e => e.package);
+const noEl = named.filter(([k]) => !taskEls[k]);
+const blobOnly = E.filter(e => e.blob_only);
+const steel = E.filter(e => e.group !== "Structural steel" && e.tasks.some(t => /^Steel beams/.test(T[t].name)));
+const pkgRows = [...packages].map(([p, l]) => ({ p, n: l.length, v: total(l), need: Math.min(...l.filter(e => e.da !== null).map(e => e.da)), lead: M.leads[p] || 0, els: l }))
+  .concat(M.scope.filter(x => x.package !== "PRELIMS").reduce((o, x) => { let r = o.find(q => q.p === x.package); if (!r) o.push(r = { p: x.package, n: 0, v: 0, need: day(x.a), lead: 0, els: [] }); r.v += x.cost; r.need = Math.min(r.need, day(x.a)); return o; }, []))
+  .reduce((o, x) => { const q = o.find(y => y.p === x.p); if (q) { q.n += x.n; q.v += x.v; q.need = Math.min(q.need, x.need); q.els = q.els.concat(x.els); } else o.push(x); return o; }, [])
+  .sort((a, b) => (a.need - a.lead * 7) - (b.need - b.lead * 7));
+
+if (BOQ) document.querySelector(".demo").textContent = M.map ? "SCHEDULE + BOQ" : "SCHEDULE COSTS";
+const TIMING = { planner: "Dates: planner's schedule", answers: "Dates: planner's answers", estimated: "Dates: Claude's draft (this job has no real schedule)" }[M.timing] || "";
+if (TIMING) document.querySelector(".demo").textContent += " · " + TIMING;
+$("proj").textContent = M.project; $("credit").textContent = M.credit;
+$("s").max = DAYS - 1;
+$("top").innerHTML = [["Elements", E.length.toLocaleString("en-US")], ["Outside the model", M.scope.length], [BOQ ? "Cost in schedule" : "Estimate", money(grand)], ["Programme", Math.round(DAYS / 7) + " weeks"], ["Packages", pkgRows.length]].map(([l, v]) => `<div><b>${v}</b><small>${l}</small></div>`).join("");
+
+// ---------- 3D ----------
+const main = $("main"), scene = new THREE.Scene();
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+main.prepend(renderer.domElement);
+const camera = new THREE.PerspectiveCamera(40, 1, .5, 5000);
+const sun = new THREE.DirectionalLight(0xffffff, .4); sun.position.set(1, 3, 2);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x667066, .75), sun);
+const root = new THREE.Group(); root.rotation.x = -Math.PI / 2; scene.add(root);  // IFC is Z-up
+const posAttr = new THREE.BufferAttribute(P, 3), color = new THREE.BufferAttribute(new Float32Array(M.nv * 3), 3);
+const gSolid = new THREE.BufferGeometry(), gGhost = new THREE.BufferGeometry();
+gSolid.setAttribute("position", posAttr); gSolid.setAttribute("color", color); gGhost.setAttribute("position", posAttr);
+const solid = new THREE.Mesh(gSolid, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide, flatShading: true }));
+const ghost = new THREE.Mesh(gGhost, new THREE.MeshBasicMaterial({ color: 0x8a948e, transparent: true, opacity: .08, depthWrite: false, side: THREE.DoubleSide }));
+solid.frustumCulled = ghost.frustumCulled = false;
+root.add(solid, ghost);
+const box = new THREE.Box3(), pt = new THREE.Vector3();
+for (const e of E) for (let k = e.t0 * 3, n = (e.t0 + e.tn) * 3; k < n; k++) box.expandByPoint(pt.fromArray(P, I[k] * 3));
+gSolid.boundingBox = box; gSolid.boundingSphere = box.getBoundingSphere(new THREE.Sphere());
+const c = box.getCenter(new THREE.Vector3()), r = box.getSize(new THREE.Vector3()).length();
+const ctr = new THREE.Vector3(c.x, c.z, -c.y);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.target.copy(ctr); camera.position.set(ctr.x + r * .75, ctr.y + r * .6, ctr.z + r * .75); controls.update();
+controls.addEventListener("change", draw);
+let fitted = false;
+function size() {
+  const w = main.clientWidth, h = main.clientHeight; renderer.setPixelRatio(devicePixelRatio); renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+  if (!fitted) { fitted = true; const k = Math.max(1, 1.25 / camera.aspect); camera.position.sub(ctr).multiplyScalar(k).add(ctr); controls.update(); }  // narrow panes need a longer shot
+  draw();
+}
+function draw() { renderer.render(scene, camera); }
+addEventListener("resize", size);
+
+const DONE = [.62, .68, .65], ACTIVE = [.9, .42, .14], SEL = [.12, .37, .75];
+let selected = null, hi = new Set(), shown = [];
+function paint(e, col) { for (let k = e.t0 * 3, n = (e.t0 + e.tn) * 3; k < n; k++) color.setXYZ(I[k], col[0], col[1], col[2]); }
+function join(parts, g) {
+  const o = new Uint32Array(parts.reduce((s, x) => s + x.length, 0)); let p = 0;
+  for (const x of parts) { o.set(x, p); p += x.length; }
+  g.setIndex(new THREE.BufferAttribute(o, 1));
+}
+const now = () => D0 + +$("s").value;
+function update() {
+  const t = now(), on = [], off = []; shown = [];
+  let done = 0, act = 0;
+  for (const e of E) {
+    const seg = I.subarray(e.t0 * 3, (e.t0 + e.tn) * 3), marked = e === selected || hi.has(e);
+    if (e.da === null || (t < e.da && !marked)) { off.push(seg); continue; }
+    const busy = t <= e.db; busy ? act++ : done++;
+    paint(e, marked ? SEL : busy ? ACTIVE : DONE);
+    on.push(seg); shown.push(e);
+  }
+  color.needsUpdate = true;
+  join(on, gSolid); join(off, gGhost);
+  ghost.visible = $("ghost").checked;
+  $("date").textContent = iso(t); $("nDone").textContent = done; $("nAct").textContent = act;
+  const v = cum[t - D0];
+  $("todate").innerHTML = `Cost to date <b>${money(v)}</b> · ${Math.round(v / grand * 100)}%`;
+  draw();
+  if (tab === "Programme") nowMarks();
+}
+function setDate() { update(); }
+$("s").oninput = setDate; $("ghost").onchange = update;
+let timer = null;
+$("play").onclick = () => {
+  if (timer) { clearInterval(timer); timer = null; $("play").textContent = "Play"; return; }
+  $("play").textContent = "Pause";
+  if (+$("s").value >= +$("s").max) $("s").value = 0;
+  timer = setInterval(() => { $("s").value = +$("s").value + 2; update(); if (+$("s").value >= +$("s").max) $("play").click(); }, 60);
+};
+function highlight(list) { hi = new Set(list); selected = null; $("card").hidden = true; update(); }
+
+// click an element
+const ray = new THREE.Raycaster(); let down = null;
+renderer.domElement.addEventListener("pointerdown", e => { down = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener("pointerup", e => {
+  if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 4) return;
+  const b = renderer.domElement.getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2((e.clientX - b.left) / b.width * 2 - 1, 1 - (e.clientY - b.top) / b.height * 2), camera);
+  const h = ray.intersectObject(solid)[0];
+  let n = h ? h.faceIndex : -1; selected = null;
+  if (h) for (const s of shown) { if (n < s.tn) { selected = s; break; } n -= s.tn; }
+  card(); update();
+});
+function card() {
+  const e = selected, el = $("card");
+  el.hidden = !e; if (!e) return;
+  const mix = e.mix ? ["Labour", "Material", "Subcontract"].map((l, i) => e.mix[i] ? [l, money(e.c * e.mix[i] / 100)] : null).filter(Boolean) : [];
+  const rows = e.lines && e.lines.length ? [["Estimated share", money(e.c)], ["Volume", num(e.m3, 2) + " m3"], ...[...sumBy(e.lines, l => (l.desc || "").split(" / PT: ")[0] || (l.ref ? l.ref + " " : "") + l.heading)].map(([k, l]) => [k, money(l.reduce((s, x) => s + x.cost, 0))])]
+    : e.cost !== undefined ? [["Quantity", num(e.q, 2) + " " + e.unit], ["Rate", money(e.rate) + " / " + e.unit], ["Cost", money(e.c)], ...mix, ["Package", e.package]] : [["Cost", "Not priced: see Checks"]];
+  el.innerHTML = `<button class="x" aria-label="Close" id="cx">×</button><h3>${esc(e.name_en || (e.item || e.type).split(" / PT: ")[0])}</h3>
+    <div class="kv lines">${rows.map(([k, v]) => `<span>${esc(k)}</span><b>${esc(v)}</b>`).join("")}</div>
+    <div class="kv">${e.tasks.map(t => `<span>${esc(T[t].name)}</span><b>${T[t].start} to ${T[t].finish}</b>`).join("")}</div>
+    <div class="kv"><span>In the model</span><b>${esc(e.type)}: ${esc(e.base)}</b></div>`;
+  $("cx").onclick = () => { selected = null; card(); update(); };
+}
+
+// ---------- tabs ----------
+const TABS = ["Breakdown", "Estimate", "Programme", "Procurement", "Checks"];
+let tab = "Breakdown", open = new Set();
+function tabs() {
+  $("tabs").innerHTML = TABS.map((t, i) => `<button aria-pressed="${t === tab}" data-t="${t}">${i + 1} ${t}</button>`).join("");
+  ({ Breakdown, Estimate, Programme, Procurement, Checks })[tab]();
+  $("pane").scrollTop = 0;
+}
+$("tabs").onclick = e => { const b = e.target.closest("button"); if (b) { tab = b.dataset.t; tabs(); } };
+function Breakdown() {
+  const gs = [...sumBy(priced, e => e.group)].sort((a, b) => total(b[1]) - total(a[1]));
+  $("pane").innerHTML = `<p class="note">Every element in the model, with net quantities measured from its geometry. Click a row to find it in the model.</p>
+  <table><tr><th>Element group</th><th>Elements</th><th>Quantity</th><th>Cost</th></tr>` + gs.map(([g, l]) => {
+    const items = [...sumBy(l, e => e.item)].sort((a, b) => total(b[1]) - total(a[1]));
+    return `<tr class="g" data-g="${esc(g)}"><td>${open.has(g) ? "▾" : "▸"} ${esc(g)}</td><td>${l.length}</td><td></td><td>${money(total(l))}</td></tr>` + (open.has(g) ? items.map(([i, x]) =>
+      `<tr class="i" data-i="${esc(i)}"><td>${esc(i)}</td><td>${x.length}</td><td>${BOQ ? num(x.reduce((s, e) => s + e.m3, 0)) + " m3" : num(x.reduce((s, e) => s + e.q, 0)) + " " + x[0].unit}</td><td>${money(total(x))}</td></tr>`).join("") : "");
+  }).join("") + `<tr class="tot"><td>Model total</td><td>${priced.length}</td><td></td><td>${money(modelTotal)}</td></tr></table>`;
+  $("pane").querySelectorAll("tr.g").forEach(r => r.onclick = () => { const g = r.dataset.g; open.has(g) ? open.delete(g) : open.add(g); highlight(priced.filter(e => e.group === g)); Breakdown(); });
+  $("pane").querySelectorAll("tr.i").forEach(r => r.onclick = () => { $("pane").querySelectorAll("tr.on").forEach(x => x.classList.remove("on")); r.classList.add("on"); highlight(priced.filter(e => e.item === r.dataset.i)); });
+}
+function Estimate() {
+  if (BOQ) {
+    $("pane").innerHTML = `<p class="note">Each BOQ line, where its money went. LOW matches are not loaded: they wait for the planner.</p>
+    <table><tr><th>BOQ line</th><th>Amount</th><th>On elements</th><th>Outside model</th><th>Match</th></tr>` + M.boq.map(l =>
+      `<tr title="${esc(l.desc)}"><td>${esc(l.ref)} ${esc(l.heading)}</td><td>${money(l.amount)}</td><td>${l.model ? money(l.model) : "–"}</td><td>${l.outside ? money(l.outside) : "–"}</td><td>${esc(l.conf)}</td></tr>`).join("") +
+      `<tr class="tot"><td>Total</td><td>${money(grand + unallocated)}</td><td>${money(modelTotal)}</td><td>${money(scopeTotal)}</td><td></td></tr></table>`;
+    return;
+  }
+  const gs = [...sumBy(priced, e => e.group)].sort((a, b) => total(b[1]) - total(a[1]));
+  const part = (l, i) => l.reduce((s, e) => s + e.c * e.mix[i] / 100, 0);
+  $("pane").innerHTML = `<p class="note">Rates are demo values from the rate table, not real prices. Swap the table for your own and every tab updates.</p>
+  <table><tr><th>Group</th><th>Labour</th><th>Material</th><th>Subcontract</th><th>Total</th></tr>` + gs.map(([g, l]) =>
+    `<tr><td>${esc(g)}</td><td>${money(part(l, 0))}</td><td>${money(part(l, 1))}</td><td>${money(part(l, 2))}</td><td>${money(total(l))}</td></tr>`).join("") +
+    `<tr class="h"><td colspan="5">Scope outside the model</td></tr>` + M.scope.map(x => `<tr title="${esc(x.note)}"><td>${esc(x.item)}<br><small>${esc(x.basis)}</small></td><td></td><td></td><td></td><td>${money(x.cost)}</td></tr>`).join("") +
+    `<tr class="tot"><td>Total</td><td></td><td></td><td></td><td>${money(grand)}</td></tr></table>`;
+}
+function chart() {
+  const W = 520, H = 170, wk = []; for (let i = 0; i < DAYS; i += 7) wk.push(spend.subarray(i, i + 7).reduce((a, b) => a + b, 0));
+  const mx = Math.max(...wk), bw = W / wk.length, line = [];
+  for (let i = 6; i < DAYS + 6; i += 7) { const k = Math.min(i, DAYS - 1); line.push(`${(k / DAYS * W).toFixed(1)},${(H - 16 - cum[k] / grand * (H - 24)).toFixed(1)}`); }
+  const months = []; for (let i = 0; i < DAYS; i++) if (iso(D0 + i).endsWith("-01")) months.push(`<text x="${i / DAYS * W}" y="${H - 3}">${new Date((D0 + i) * 864e5).toLocaleString("en", { month: "short", timeZone: "UTC" })}</text>`);
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Weekly cost bars and cumulative cost line">` +
+    wk.map((v, i) => `<rect x="${(i * bw + .5).toFixed(1)}" y="${(H - 16 - v / mx * (H - 24)).toFixed(1)}" width="${Math.max(bw - 1, 1).toFixed(1)}" height="${(v / mx * (H - 24)).toFixed(1)}" fill="var(--bar)"/>`).join("") +
+    `<polyline points="${line.join(" ")}" fill="none" stroke="#e66b24" stroke-width="2"/><line id="nowl" y1="4" y2="${H - 16}" stroke="var(--ink)" stroke-dasharray="3 3"/>${months.join("")}</svg>`;
+}
+function Programme() {
+  const ph = [...sumBy(named.filter(([k, t]) => !BOQ || taskEls[k] || taskCost[k] || t.start !== t.finish).sort((a, b) => a[1].start.localeCompare(b[1].start)), ([, t]) => t.phase || "Schedule")];
+  $("pane").innerHTML = `<p class="note">Bars are weekly cost, the line is cumulative. Real dates from the project schedule${BOQ ? "" : ", demo rates"}. Click a task to see its elements.</p>${chart()}
+  <table style="margin-top:8px"><tr><th>Activity</th><th style="width:34%">${M.start} to ${M.finish}</th><th>Elements</th><th>Cost</th></tr>` + ph.map(([p, l]) =>
+    `<tr class="h"><td colspan="4">${esc(p)}</td></tr>` + l.map(([k, t]) => {
+      const a = day(t.start) - D0, b = day(t.finish) - D0 + 1;
+      return `<tr class="i" data-k="${k}"><td>${esc(t.name)}</td><td><div class="gantt"><i data-a="${a}" data-b="${b}" style="left:${a / DAYS * 100}%;width:${(b - a) / DAYS * 100}%"></i></div></td><td>${taskEls[k] || "–"}</td><td>${taskCost[k] ? money(taskCost[k]) : "–"}</td></tr>`;
+    }).join("")).join("") + `</table>`;
+  $("pane").querySelectorAll("tr.i").forEach(r => r.onclick = () => { const k = r.dataset.k; $("pane").querySelectorAll("tr.on").forEach(x => x.classList.remove("on")); r.classList.add("on"); highlight(E.filter(e => e.tasks.includes(k))); $("s").value = day(T[k].start) - D0; update(); });
+  nowMarks();
+}
+function nowMarks() {
+  const x = (now() - D0) / DAYS * 520, l = $("nowl"); if (l) { l.setAttribute("x1", x); l.setAttribute("x2", x); }
+  document.querySelectorAll(".gantt i").forEach(i => i.classList.toggle("now", now() - D0 >= +i.dataset.a && now() - D0 < +i.dataset.b));
+}
+function Procurement() {
+  $("pane").innerHTML = `<p class="note">${BOQ ? "Grouped by BOQ heading. Add a package and lead time per heading to get order-by dates." : "The same elements grouped by who supplies them. Needed date is the first install date in the schedule. Order-by is that date less the demo lead time. Sorted by order-by."}</p>
+  <table><tr><th>Package</th><th>Elements</th><th>Value</th><th>Lead</th><th>Order by</th><th>Needed</th></tr>` + pkgRows.map((r, i) =>
+    `<tr class="i" data-i="${i}"><td>${esc(r.p)}</td><td>${r.n || "–"}</td><td>${money(r.v)}</td><td>${r.lead ? r.lead + " wk" : "–"}</td><td>${r.lead ? iso(r.need - r.lead * 7) : "–"}</td><td>${iso(r.need)}</td></tr>`).join("") + `</table>`;
+  $("pane").querySelectorAll("tr.i").forEach(r => r.onclick = () => { $("pane").querySelectorAll("tr.on").forEach(x => x.classList.remove("on")); r.classList.add("on"); highlight(pkgRows[+r.dataset.i].els); });
+}
+function benchmarkText() {
+  const r = M.benchmark.months, tr = r.reduce((x, y) => x + y, 0), step = 30, start = 0;
+  let c = 0;
+  return r.map((v, i) => { c += v; const d = Math.min(DAYS - 1, (i + 1) * step - 1); return `M${i + 1}: ${Math.round(cum[d] / cum[DAYS - 1] * 100)}% vs ${Math.round(c / tr * 100)}%`; }).join(" · ");
+}
+function Checks() {
+  const byPkg = pkgRows.reduce((s, r) => s + r.v, 0) + M.scope.filter(x => x.package === "PRELIMS").reduce((s, x) => s + x.cost, 0);
+  const diff = Math.max(Math.abs(cum[DAYS - 1] - grand), Math.abs(byPkg - grand));
+  const list = (a, n = 8) => `<ul>${a.slice(0, n).map(x => `<li>${esc(x)}</li>`).join("")}${a.length > n ? `<li>and ${a.length - n} more</li>` : ""}</ul>`;
+  const un = [...sumBy(unpriced, e => `${e.type}: ${e.base || "(no name)"}`)].sort((a, b) => b[1].length - a[1].length).map(([k, l]) => `${k} x ${l.length}`);
+  const covered = /earthworks|setting out|mark out|utilities|services below|scaffold/i;
+  const open_ = noEl.filter(([, t]) => BOQ || !covered.test(t.name));
+  const boqGap = BOQ ? Math.abs(M.boq.reduce((s, l) => s + l.amount, 0) - grand) : 0;
+  const extra = BOQ && M.map ? M.boq.filter(l => !l.src.length) : [];
+  const openMoney = BOQ ? (M.open_ends || []).reduce((s, k) => s + (taskCost[k] || 0), 0) : 0;
+  const cs = [
+    [M.timing === "planner", TIMING || "Dates: not stated", M.timing === "planner" ? "Money is timed by the activities in the planner's schedule." : M.timing === "answers" ? "Timed by package dates the planner gave, not a full schedule. Monthly figures are only as fine as those packages." : "No planner's schedule came with this job, so Claude drafted the dates. In one blind test a drafted plan ran 30 points behind the contractor's curve, so do not use this curve as a forecast. Load the planner's schedule and this goes away."],
+    ...(M.job_check || []).map(c => [c.ok, "Job check: " + c.title, c.detail, ""]),
+    ...(M.benchmark ? [[false, M.benchmark.label + " vs this plan", "Cumulative to each month. The contractor's curve is real; this plan's dates are not. " + benchmarkText(), ""]] : []),
+    [diff < .01 && boqGap < .01, "Totals agree", BOQ ? `BOQ ${money(grand + unallocated)} = ${money(modelTotal)} on elements + ${money(scopeTotal)} outside the model + ${money(unallocated)} not loaded (difference ${boqGap.toFixed(2)}). Packages and cost curve match.` : `Estimate, packages and the cost curve all come to ${money(grand)} (difference ${diff.toFixed(2)}).`],
+    ...(BOQ ? [[!M.unalloc.length, `${M.unalloc.length} BOQ lines not loaded (${money(unallocated)})`, "Left for the planner to place, not forced onto an activity.", list(M.unalloc.map(u => `${u.ref} ${u.heading}: ${u.why}`))],
+      [!extra.length, `${extra.length} costs in the schedule are not from this BOQ (${money(extra.reduce((s, l) => s + l.amount, 0))})`, "Resource budgets or hand-loaded expenses already in the schedule. Included in the total: confirm they are not double counted.", list(extra.map(l => `${l.heading}: ${money(l.amount)}`))],
+      [!zeroM.length, `${zeroM.length} BOQ lines differ from what the schedule loaded`, "BOQ amount and schedule cost should match line by line.", list(zeroM.map(l => `${l.ref} ${l.heading}: BOQ ${money(l.amount)}, schedule ${money(l.model + l.outside)}`))],
+      [(M.open_ends || []).length <= 1, `${(M.open_ends || []).length} activities have no predecessor (${money(openMoney)})`, "With no logic they sit at their earliest date, so their cost lands too early on the curve. Confirm the logic before trusting monthly cash.", list((M.open_ends || []).map(k => T[k].name))],
+      [!(M.undated || []).length, `${(M.undated || []).length} costed activities have no dates`, "Spread evenly across the programme so the total still holds.", list((M.undated || []).map(k => T[k].name))],
+      [!M.links_missed && !(M.links_dead || []).length, `${M.links_missed || 0} element links not found, ${(M.links_dead || []).length} point at activities not in this schedule`, "Stale links: refresh them with the 4D skill if the model or schedule changed."]] : []),
+    [!unpriced.length, BOQ ? `${unpriced.length} elements carry no BOQ cost` : `${unpriced.length} elements have no rate`, BOQ ? "Not linked to an activity, or their activity has no BOQ line." : "Left out of the estimate, not guessed. Add a rate rule to price them.", list(un), unpriced],
+    ...(blobOnly.length ? [[false, `${blobOnly.length} elements only linked to "${M.blob_tasks[0] || ""}"`, "One task covers the whole model, so these elements have no date of their own. Their timing on the slider is weak.", null, blobOnly]] : []),
+    [!open_.length, BOQ ? `${open_.length} activities have no element in the model` : `${open_.length} of ${noEl.length} activities with no element are not in the outside-model list`, BOQ ? "Often procurement, milestones or MEP. Their cost stays in the total as outside the model." : "Work on the schedule with nothing in the model and no cost against it yet.", list([...new Set(open_.map(([, t]) => t.name))])],
+    [!steel.length, `${steel.length} non-steel elements linked to a steel beams task`, "Likely a wrong link in the source schedule. Worth asking the planner.", list([...new Set(steel.map(e => e.item))]), steel],
+  ];
+  if (BOQ) cs.pop();  // the steel link check only applies to the rate-table route
+  $("pane").innerHTML = `<p class="note">What does not add up, listed rather than hidden.</p>` + cs.map(([ok, h, p, extra, els], i) =>
+    `<div class="chk"><h4><span>${esc(h)}</span><span class="${ok ? "ok" : "warn"}">${ok ? "Pass" : "Review"}</span></h4><p>${esc(p)}</p>${extra || ""}${els ? `<button data-c="${i}">Show in model</button>` : ""}</div>`).join("");
+  $("pane").querySelectorAll("button[data-c]").forEach(b => b.onclick = () => highlight(cs[+b.dataset.c][4]));
+}
+size(); $("s").value = Math.round(DAYS * .4); tabs(); update();
+</script>
